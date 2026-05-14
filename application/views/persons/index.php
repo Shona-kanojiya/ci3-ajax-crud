@@ -2,17 +2,18 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-    <h2 class="mb-1">All Persons</h2>
-    <small class="text-muted">
-        <?= $total ?> record<?= $total != 1 ? 's' : '' ?> in database
-    </small>
+        <h2 class="mb-1">All Persons</h2>
+        <small class="text-muted">
+            <?php $count = $total ?? 0; ?>
+            <?= $count ?> record<?= $count != 1 ? 's' : '' ?> in database
+        </small>
     </div>
     <a href="<?= base_url('persons/form') ?>" class="btn btn-primary">
         + Add Person
     </a>
 </div>
 
-<?php if ($flash): ?>
+<?php if (isset($flash)): ?>
     <div class="alert alert-<?= $flash_type ?> alert-dismissible fade show" role="alert">
     <?= htmlspecialchars($flash) ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -26,7 +27,6 @@
         <a href="<?= base_url('persons/form') ?>" class="btn btn-primary">Add First Person</a>
     </div>
 <?php else: ?>
-
     <div class="card shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -90,11 +90,24 @@
             </div>
         </div>
     </div>
+    <?php if ($total_pages > 1): ?>
+    <ul class="pagination mt-3 justify-content-center">
+        <?php if ($current_page > 1): ?>
+            <li class="page-item"><a class="page-link" href="<?= base_url('persons/1') ?>">&laquo;</a></li>
+            <li class="page-item"><a class="page-link" href="<?= base_url('persons/'.($current_page-1)) ?>">&#8249;</a></li>
+        <?php endif; ?>
 
-    <?php if ($pagination): ?>
-    <div class="mt-3">
-        <?= $pagination ?>
-    </div>
+        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+            <li class="page-item <?= ($i == $current_page) ? 'active' : '' ?>">
+                <a class="page-link" href="<?= base_url('persons/'.$i) ?>"><?= $i ?></a>
+            </li>
+        <?php endfor; ?>
+
+        <?php if ($current_page < $total_pages): ?>
+            <li class="page-item"><a class="page-link" href="<?= base_url('persons/'.($current_page+1)) ?>">&#8250;</a></li>
+            <li class="page-item"><a class="page-link" href="<?= base_url('persons/'.$total_pages) ?>">&raquo;</a></li>
+        <?php endif; ?>
+    </ul>
     <?php endif; ?>
 <?php endif; ?>
 
