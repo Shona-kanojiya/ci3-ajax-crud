@@ -17,13 +17,10 @@ class Persons extends CI_Controller {
     {
         parent::__construct();
         $this->load->model('Person_model');
-        $this->load->library(['form_validation', 'pagination', 'session']);
-        $this->load->helper(['url', 'form']);
+        $this->load->helper(['url', 'form', 'common']);
     }
 
-    // ----------------------------------------------------------------
-    //  INDEX – List with pagination
-    // ----------------------------------------------------------------
+    //  List with pagination
     public function index()
     {
         $per_page = 8;
@@ -72,23 +69,36 @@ class Persons extends CI_Controller {
         $this->load->view('layout/footer');
     }
 
-    // ----------------------------------------------------------------
-    //  CREATE – show form
-    // ----------------------------------------------------------------
-    public function create()
+    //  Create/Edit form
+    public function form($enc_id = null)
     {
-        $data['states']     = $this->states;
-        $data['action']     = 'create';
-        $data['person']     = NULL;
+        $data['states'] = $this->states;
+
+        $id = $enc_id ? dec_id($enc_id) : null;
+
+        if ($id) {
+            $person = $this->Person_model->get_by_id($id);
+            if (!$person) { show_404(); }
+
+            $data['action'] = 'edit';
+            $data['person'] = $person;
+        } else {
+            $data['action'] = 'create';
+            $data['person'] = null;
+        }
 
         $this->load->view('layout/header', $data);
         $this->load->view('persons/form', $data);
         $this->load->view('layout/footer');
     }
 
-    public function save($id = null)
+    //  Save (Create/Update)
+    public function save()
     {
-        $this->_set_rules();
+        $mode = $this->input->post('enc_id') ? 'edit' : 'create';
+        $id = dec_id($this->input->post('enc_id', TRUE));
+
+        $this->_set_rules($mode, $this->input->post('enc_id', TRUE));
 
         if ($this->form_validation->run() === FALSE) {
 
@@ -109,7 +119,7 @@ class Persons extends CI_Controller {
 
         $email = $this->input->post('email', TRUE);
 
-        // ✅ Check duplicate email AFTER validation
+        // Check duplicate email
         if ($this->Person_model->email_exists($email, $id)) {
 
             echo json_encode([
@@ -136,83 +146,33 @@ class Persons extends CI_Controller {
         echo json_encode([
             'status' => 'success',
             'message' => $msg,
-            'redirect' => base_url('persons'),
-            'csrf_token' => $this->security->get_csrf_hash(),
-            'csrf_name'  => $this->security->get_csrf_token_name()
+            'redirect' => base_url('persons')
         ]);
     }
 
-    // ----------------------------------------------------------------
-    //  UPDATE – handle POST
-    // ----------------------------------------------------------------
-    public function update($id)
+
+    //  Delete
+    public function delete()
     {
-        $person = $this->Person_model->get_by_id($id);
-        if ( ! $person) { show_404(); }
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
 
-        $this->_set_rules('edit', $id);
+        $id = dec_id($this->input->post('enc_id', TRUE));
 
-        if ($this->form_validation->run() === FALSE) {
-            $data['states']  = $this->states;
-            $data['action']  = 'edit';
-            $data['person']  = $person;
-            $this->load->view('layout/header', $data);
-            $this->load->view('persons/form', $data);
-            $this->load->view('layout/footer');
+        if (!$id) {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid ID']);
             return;
         }
 
-        $this->Person_model->update($id, $this->_post_data());
-        $this->session->set_flashdata('msg', 'Record updated successfully.');
-        $this->session->set_flashdata('msg_type', 'success');
-        redirect('persons');
-    }
-
-    // ----------------------------------------------------------------
-    //  DELETE
-    // ----------------------------------------------------------------
-    public function delete($id)
-    {
-        // CSRF check – only accept POST
-        if ($this->input->server('REQUEST_METHOD') !== 'POST') {
-            show_404();
-        }
-        $person = $this->Person_model->get_by_id($id);
-        if ( ! $person) { show_404(); }
-
-        $this->Person_model->delete($id);
-        $this->session->set_flashdata('msg', 'Record deleted.');
-        $this->session->set_flashdata('msg_type', 'danger');
-        redirect('persons');
-    }
-
-    // ----------------------------------------------------------------
-    //  Helpers
-    // ----------------------------------------------------------------
-    private function _set_rules($mode = 'create', $id = 0)
-    {
-        $email_rule = 'required|valid_email|max_length[150]';
-        if ($mode === 'edit') {
-            // allow same email for same record
-            $email_rule .= '|callback__email_unique[' . $id . ']';
+        if ($this->Person_model->delete($id)) {
+            $this->session->set_flashdata('msg', 'Record deleted.');
+            $this->session->set_flashdata('msg_type', 'danger');
+            
+            echo json_encode(['status' => 'success']);
         } else {
-            $email_rule .= '|callback__email_unique[0]';
+            echo json_encode(['status' => 'error', 'message' => 'Delete failed']);
         }
-
-        $this->form_validation->set_rules('name',   'Name',   'required|trim|min_length[2]|max_length[100]');
-        $this->form_validation->set_rules('email',  'Email',  $email_rule);
-        $this->form_validation->set_rules('mobile', 'Mobile', 'required|trim|min_length[10]|max_length[15]|regex_match[/^[0-9+\-\s]+$/]');
-        $this->form_validation->set_rules('gender', 'Gender', 'required|in_list[Male,Female,Other]');
-        $this->form_validation->set_rules('state',  'State',  'required|trim|max_length[60]');
-    }
-
-    public function _email_unique($email, $exclude_id)
-    {
-        if ($this->Person_model->email_exists($email, (int)$exclude_id)) {
-            $this->form_validation->set_message('_email_unique', 'The {field} is already in use.');
-            return FALSE;
-        }
-        return TRUE;
     }
 
     private function _post_data()
@@ -224,5 +184,69 @@ class Persons extends CI_Controller {
             'gender' => $this->input->post('gender', TRUE),
             'state'  => $this->input->post('state',  TRUE),
         ];
+    }
+
+    //  Helpers
+    public function check_email($email = null, $id = null)
+    {
+        // CASE 1: CI FORM VALIDATION CALLBACK
+        if ($email !== null && $id !== null) {
+            $id = dec_id($id);
+
+            $exists = $this->Person_model->email_exists($email, (int)$id);
+
+            if ($exists) {
+                $this->form_validation->set_message('check_email', 'Email already exists');
+                return FALSE;
+            }
+
+            return TRUE;
+        }
+
+        // CASE 2: AJAX REMOTE VALIDATION
+        $email = $this->input->post('email', TRUE);
+        $id    = dec_id($this->input->post('enc_id', TRUE));
+
+        $exists = $this->Person_model->email_exists($email, (int)$id);
+
+        echo $exists ? "false" : "true";
+        exit;
+    }
+    
+    public function check_mobile($mobile = null, $id = null)
+    {
+        // CASE 1: CI FORM VALIDATION CALLBACK
+        if ($mobile !== null && $id !== null) {
+            $id = dec_id($id);
+
+            $exists = $this->Person_model->mobile_exists($mobile, (int)$id);
+
+            if ($exists) {
+                $this->form_validation->set_message('check_mobile', 'Mobile already exists');
+                return FALSE;
+            }
+
+            return TRUE;
+        }
+
+        // CASE 2: AJAX REMOTE VALIDATION
+        $mobile = $this->input->post('mobile', TRUE);
+        $id     = dec_id($this->input->post('enc_id', TRUE));
+
+        $exists = $this->Person_model->mobile_exists($mobile, (int)$id);
+
+        echo $exists ? "false" : "true";
+        exit;
+    }
+
+    private function _set_rules($mode = 'create', $id = 0)
+    {
+        $email_rule = 'required|valid_email|max_length[150]|callback_check_email['.$id.']';
+        $mobile_rule = 'required|trim|min_length[10]|max_length[15]|regex_match[/^[0-9+\-\s]+$/]|callback_check_mobile['.$id.']';
+        $this->form_validation->set_rules('name',   'Name',   'required|trim|min_length[2]|max_length[100]');
+        $this->form_validation->set_rules('email',  'Email',  $email_rule);
+        $this->form_validation->set_rules('mobile', 'Mobile', $mobile_rule);
+        $this->form_validation->set_rules('gender', 'Gender', 'required|in_list[Male,Female,Other]');
+        $this->form_validation->set_rules('state',  'State',  'required|trim|max_length[60]');
     }
 }

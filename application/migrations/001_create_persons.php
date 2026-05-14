@@ -23,12 +23,13 @@ class Migration_Create_persons extends CI_Migration {
                 'type' => 'VARCHAR',
                 'constraint' => '150',
                 'null' => FALSE,
-                'unique' => TRUE   // ✅ FIX: proper unique
+                'unique' => TRUE   
             ),
             'mobile' => array(
                 'type' => 'VARCHAR',
-                'constraint' => '15',
-                'null' => FALSE
+                'constraint' => '10',
+                'null' => FALSE,
+                'unique' => TRUE   
             ),
             'gender' => array(
                 'type' => "ENUM('Male','Female','Other')",

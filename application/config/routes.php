@@ -53,12 +53,5 @@ $route['default_controller'] = 'persons';
 $route['404_override']       = '';
 $route['translate_uri_dashes'] = FALSE;
 
-$route['persons']               = 'persons/index';
-$route['persons/create']        = 'persons/create';
-$route['persons']                = 'persons/index';
-$route['persons/create']         = 'persons/create';
-$route['persons/edit/(:num)']    = 'persons/edit/$1';
-
-$route['persons/save']           = 'persons/save';
-$route['persons/save/(:num)']    = 'persons/save/$1';
-$route['persons/delete/(:num)'] = 'persons/delete/$1';
+$route['persons/form'] = 'persons/form';
+$route['persons/form/(:any)'] = 'persons/form/$1';

@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://localhost/crud_shona_5_13/';
+$config['base_url'] = 'http://localhost/crud_ci3/';
 
 /*
 |--------------------------------------------------------------------------
@@ -326,7 +326,8 @@ $config['cache_query_string'] = FALSE;
 | https://codeigniter.com/userguide3/libraries/encryption.html
 |
 */
-$config['encryption_key'] = '';
+
+$config['encryption_key'] = 'hB3g9Lq2wSd8Fv6Tz1N0xR5uPa7Yk4M';
 
 /*
 |--------------------------------------------------------------------------
@@ -462,7 +463,10 @@ $config['csrf_token_name'] = 'csrf_test_name';
 $config['csrf_cookie_name'] = 'csrf_cookie_name';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = TRUE;
-$config['csrf_exclude_uris'] = array();
+$config['csrf_exclude_uris'] = array(
+    'persons/check_email',
+    'persons/check_mobile'
+);
 
 /*
 |--------------------------------------------------------------------------

@@ -1,9 +1,11 @@
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /crud_shona_5_13/
+RewriteEngine on
+RewriteCond $1 !^(index\.php|resources|robots\.txt)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L,QSA] 
 
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-
-    RewriteRule ^(.*)$ index.php/$1 [L]
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
 </IfModule>
