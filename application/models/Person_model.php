@@ -5,12 +5,6 @@ class Person_model extends CI_Model {
 
     protected $table = 'persons';
 
-    public function __construct()
-    {
-        parent::__construct();
-        $this->load->database();
-    }
-
     //  READ – paginated list
     public function get_all($limit = 10, $offset = 0)
     {
@@ -65,6 +59,7 @@ class Person_model extends CI_Model {
         return $this->db->count_all_results($this->table) > 0;
     }
 
+    //  Mobile uniqueness check (exclude own row on edit)
     public function mobile_exists($mobile, $exclude_id = 0)
     {
         $this->db->where('mobile', $mobile);
