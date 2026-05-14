@@ -23,7 +23,7 @@ class Persons extends CI_Controller {
     //  List with pagination
     public function index($page = 1)
     {
-        $per_page = 5;
+        $per_page = 10; // Records per page
         $total    = $this->Person_model->count_all();
 
         // Ensure valid page
@@ -35,7 +35,8 @@ class Persons extends CI_Controller {
         $data['persons']    = $this->Person_model->get_all($per_page, $offset);
         $data['total']      = $total;
         $data['current_page'] = $page;
-        $data['total_pages']  = ceil($total / $per_page);
+        $data['total_pages'] = max(1, ceil($total / $per_page));
+
         $data['flash']      = $this->session->flashdata('msg');
         $data['flash_type'] = $this->session->flashdata('msg_type');
 
