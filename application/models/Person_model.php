@@ -10,7 +10,7 @@ class Person_model extends CI_Model {
     {
         return $this->db
                     ->order_by('id', 'DESC')
-                    ->get($this->table, (int)$limit, (int)$offset)
+                    ->get($this->table, $limit, $offset)
                     ->result();
     }
 

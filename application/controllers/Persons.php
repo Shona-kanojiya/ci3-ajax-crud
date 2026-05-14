@@ -23,47 +23,68 @@ class Persons extends CI_Controller {
     //  List with pagination
     public function index()
     {
-        $per_page = 8;
+        // 1. Basic Setup
+        $per_page = 2;
         $total    = $this->Person_model->count_all();
-        $page     = (int)($this->input->get('page') ?: 1);
-        $offset   = ($page - 1) * $per_page;
+        
+        // 2. Calculate Page and Offset
+        $page = $this->input->get('page') ? (int) $this->input->get('page') : 1;
+        $page = max(1, $page); 
+        $offset = ($page - 1) * $per_page;
 
-        // Pagination config
+        // 3. Pagination Configuration
         $config = [
-            'base_url'   => site_url('persons?page='),
-            'total_rows' => $total,
-            'per_page'   => $per_page,
-            'cur_page'   => $page,
-            'use_page_numbers' => TRUE,
-            'reuse_query_string' => FALSE,
-            'full_tag_open'  => '<ul class="pagination">',
-            'full_tag_close' => '</ul>',
-            'first_link'  => '&laquo;',
-            'last_link'   => '&raquo;',
-            'prev_link'   => '&#8249;',
-            'next_link'   => '&#8250;',
-            'attributes'  => ['class' => 'page-link'],
-            'cur_tag_open'  => '<li class="page-item active"><a class="page-link" href="#">',
-            'cur_tag_close' => '</a></li>',
-            'num_tag_open'  => '<li class="page-item">',
-            'num_tag_close' => '</li>',
-            'prev_tag_open' => '<li class="page-item">',
-            'prev_tag_close'=> '</li>',
-            'next_tag_open' => '<li class="page-item">',
-            'next_tag_close'=> '</li>',
-            'first_tag_open'=> '<li class="page-item">',
-            'first_tag_close'=> '</li>',
-            'last_tag_open' => '<li class="page-item">',
-            'last_tag_close'=> '</li>',
+            'base_url'             => site_url('persons'),
+            'total_rows'           => $total,
+            'per_page'             => $per_page,
+            'page_query_string'    => TRUE,
+            'use_page_numbers'     => TRUE,
+            'query_string_segment' => 'page',
+            
+            'cur_page'             => $page, 
+            'uri_segment'          => 0,     
+            
+            'full_tag_open'        => '<ul class="pagination">',
+            'full_tag_close'       => '</ul>',
+            'first_link'           => '&laquo;',
+            'last_link'            => '&raquo;',
+            'prev_link'            => '&#8249;',
+            'next_link'            => '&#8250;',
+            
+            // Link attributes
+            'attributes'           => ['class' => 'page-link'],
+            
+            'cur_tag_open'         => '<li class="page-item active"><span class="page-link">',
+            'cur_tag_close'        => '</span></li>',
+            
+            // Other tags
+            'num_tag_open'         => '<li class="page-item">',
+            'num_tag_close'        => '</li>',
+            'prev_tag_open'        => '<li class="page-item">',
+            'prev_tag_close'       => '</li>',
+            'next_tag_open'        => '<li class="page-item">',
+            'next_tag_close'       => '</li>',
+            'first_tag_open'       => '<li class="page-item">',
+            'first_tag_close'      => '</li>',
+            'last_tag_open'        => '<li class="page-item">',
+            'last_tag_close'       => '</li>',
         ];
+
+        // Hide Previous link if on page 1 to prevent "-1" or "0" logic issues
+        if ($page <= 1) {
+            $config['prev_link'] = FALSE;
+        }
+
         $this->pagination->initialize($config);
 
+        // 4. Data Preparation
         $data['persons']    = $this->Person_model->get_all($per_page, $offset);
         $data['pagination'] = $this->pagination->create_links();
         $data['total']      = $total;
         $data['flash']      = $this->session->flashdata('msg');
         $data['flash_type'] = $this->session->flashdata('msg_type');
 
+        // 5. Load Views
         $this->load->view('layout/header', $data);
         $this->load->view('persons/index', $data);
         $this->load->view('layout/footer');
@@ -212,7 +233,7 @@ class Persons extends CI_Controller {
         echo $exists ? "false" : "true";
         exit;
     }
-    
+
     public function check_mobile($mobile = null, $id = null)
     {
         // CASE 1: CI FORM VALIDATION CALLBACK
