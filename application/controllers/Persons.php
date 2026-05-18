@@ -27,8 +27,7 @@ class Persons extends CI_Controller {
         $total    = $this->Person_model->count_all();
 
         // Ensure valid page
-        $page = (int) $page;
-        $page = max(1, $page);
+        $page = max(1, (int) $page);
 
         $offset = ($page - 1) * $per_page;
 
@@ -93,22 +92,6 @@ class Persons extends CI_Controller {
             return;
         }
 
-        $email = $this->input->post('email', TRUE);
-
-        // Check duplicate email
-        if ($this->Person_model->email_exists($email, $id)) {
-
-            echo json_encode([
-                'status' => 'error',
-                'errors' => [
-                    'email' => 'Email already exists'
-                ],
-                'csrf_token' => $this->security->get_csrf_hash(),
-                'csrf_name'  => $this->security->get_csrf_token_name()
-            ]);
-            return;
-        }
-
         $data = $this->_post_data();
 
         if ($id) {
@@ -137,7 +120,7 @@ class Persons extends CI_Controller {
         $id = dec_id($this->input->post('enc_id', TRUE));
 
         if (!$id) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid ID']);
+            echo json_encode(['status' => 'error', 'message' => 'Something went wrong']);
             return;
         }
 

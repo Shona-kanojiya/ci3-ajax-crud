@@ -26,7 +26,7 @@
             <label>Name *</label>
             <input type="text" name="name" class="form-control"
                 placeholder="Enter your full name"
-                value="<?= set_value('name', $person ? $person->name : '') ?>">
+                value="<?= set_value('name', isset($person->name) ? $person->name : '') ?>">
             <div class="invalid-feedback"></div>
         </div>
 
@@ -35,7 +35,7 @@
             <label>Email *</label>
             <input type="email" name="email" class="form-control"
                 placeholder="Enter your email address"
-                value="<?= set_value('email', $person ? $person->email : '') ?>">
+                value="<?= set_value('email', isset($person->email) ? $person->email : '') ?>">
             <div class="invalid-feedback"></div>
         </div>
 
@@ -44,7 +44,7 @@
             <label>Mobile *</label>
             <input type="text" name="mobile" class="form-control"
                 placeholder="Enter your mobile number"
-                value="<?= set_value('mobile', $person ? $person->mobile : '') ?>">
+                value="<?= set_value('mobile', isset($person->mobile) ? $person->mobile : '') ?>">
             <div class="invalid-feedback"></div>
         </div>
 
@@ -55,7 +55,7 @@
                 <label class="form-label d-block">Gender *</label>
 
                 <?php 
-                    $g = set_value('gender', $person ? $person->gender : 'Male');
+                    $g = set_value('gender', $person->gender ?? 'Male');
                 ?>
 
                 <div class="form-check form-check-inline">
@@ -93,7 +93,7 @@
                     <option value="">Select State</option>
                     <?php foreach($states as $s): ?>
                         <option value="<?= $s ?>"
-                            <?= set_value('state', $person ? $person->state : '') == $s ? 'selected':'' ?>>
+                            <?= set_value('state', $person->state ?? '') == $s ? 'selected' : '' ?>>
                             <?= $s ?>
                         </option>
                     <?php endforeach; ?>
