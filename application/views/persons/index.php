@@ -152,7 +152,7 @@
         $.ajax({
             url: form.attr('action'),
             type: 'POST',
-            data: form.serialize(), // This includes the CSRF hidden input
+            data: form.serialize(), 
             dataType: 'json',
             success: function(res) {
                 if (res.status === 'success') {
