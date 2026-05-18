@@ -201,7 +201,7 @@ class Persons extends CI_Controller {
     private function _set_rules($mode = 'create', $id = 0)
     {
         $email_rule = 'required|valid_email|max_length[150]|callback_check_email['.$id.']';
-        $mobile_rule = 'required|trim|min_length[10]|max_length[15]|regex_match[/^[0-9+\-\s]+$/]|callback_check_mobile['.$id.']';
+        $mobile_rule = 'required|trim|min_length[10]|max_length[10]|regex_match[/^[0-9+\-\s]+$/]|callback_check_mobile['.$id.']';
         $this->form_validation->set_rules('name',   'Name',   'required|trim|min_length[2]|max_length[100]');
         $this->form_validation->set_rules('email',  'Email',  $email_rule);
         $this->form_validation->set_rules('mobile', 'Mobile', $mobile_rule);

@@ -9,6 +9,7 @@ class Person_model extends CI_Model {
     public function get_all($limit = 10, $offset = 0)
     {
         return $this->db
+                    ->where('soft_delete', 0)
                     ->order_by('id', 'DESC')
                     ->get($this->table, $limit, $offset)
                     ->result();
@@ -16,7 +17,9 @@ class Person_model extends CI_Model {
 
     public function count_all()
     {
-        return $this->db->count_all($this->table);
+        return $this->db
+            ->where('soft_delete', 0)
+            ->count_all_results($this->table);
     }
 
     //  READ – single record
@@ -44,15 +47,32 @@ class Person_model extends CI_Model {
 
     //  DELETE
     public function delete($id)
-    {
-        $this->db->where('id', (int)$id);
-        return $this->db->delete($this->table);
+{
+    $user = $this->db
+        ->select('email')
+        ->where('id', (int)$id)
+        ->get($this->table)
+        ->row();
+
+    if (!$user) {
+        return false; 
     }
+
+    $old_email = $user->email;
+
+    $this->db->where('id', (int)$id);
+    return $this->db->update($this->table, [
+        'soft_delete' => 1,
+        'email' => time() . '_deleted_' . $old_email
+    ]);
+}
 
     //  Email uniqueness check (exclude own row on edit)
     public function email_exists($email, $exclude_id = 0)
     {
         $this->db->where('email', $email);
+        $this->db->where('soft_delete', 0);
+
         if ($exclude_id) {
             $this->db->where('id !=', (int)$exclude_id);
         }
@@ -63,6 +83,7 @@ class Person_model extends CI_Model {
     public function mobile_exists($mobile, $exclude_id = 0)
     {
         $this->db->where('mobile', $mobile);
+
         if ($exclude_id) {
             $this->db->where('id !=', (int)$exclude_id);
         }
