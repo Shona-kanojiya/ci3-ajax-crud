@@ -25,7 +25,7 @@
         <div class="mb-3">
             <label>Name *</label>
             <input type="text" name="name" class="form-control"
-                placeholder="Enter your full name"
+                placeholder="John Doe"
                 value="<?= set_value('name', isset($person->name) ? $person->name : '') ?>">
             <div class="invalid-feedback"></div>
         </div>
@@ -34,7 +34,7 @@
         <div class="mb-3">
             <label>Email *</label>
             <input type="email" name="email" class="form-control"
-                placeholder="Enter your email address"
+                placeholder="john.doe@example.com"
                 value="<?= set_value('email', isset($person->email) ? $person->email : '') ?>">
             <div class="invalid-feedback"></div>
         </div>
@@ -43,7 +43,7 @@
         <div class="mb-3">
             <label>Mobile *</label>
             <input type="text" name="mobile" class="form-control"
-                placeholder="Enter your mobile number"
+                placeholder="9876543210"
                 value="<?= set_value('mobile', isset($person->mobile) ? $person->mobile : '') ?>">
             <div class="invalid-feedback"></div>
         </div>
@@ -191,8 +191,8 @@
                 },
                 mobile: {
                     required: "Enter valid mobile",
-                    minlength: "Enter valid mobile",
-                    maxlength: "Enter valid mobile",
+                    minlength: "Mobile must be 10 digits",
+                    maxlength: "Mobile must be 10 digits",
                     remote:   "Mobile already exists"
                 },
                 gender: "Select gender",

@@ -47,25 +47,29 @@ class Person_model extends CI_Model {
 
     //  DELETE
     public function delete($id)
-{
-    $user = $this->db
-        ->select('email')
-        ->where('id', (int)$id)
-        ->get($this->table)
-        ->row();
+    {
+        $user = $this->db
+            ->select('email, mobile')
+            ->where('id', (int)$id)
+            ->get($this->table)
+            ->row();
 
-    if (!$user) {
-        return false; 
+        if (!$user) {
+            return false; 
+        }
+
+        $old_email = $user->email;
+        $old_mobile = $user->mobile;
+        $this->db->where('id', (int)$id);
+        return $this->db->update($this->table, [
+            'soft_delete' => 1,
+            'email' => time() . '_deleted_' . $old_email,
+            'mobile' => $old_mobile . '_' . time()
+        ]);
+
+        // $this->db->where('id', (int)$id);
+        // return $this->db->update($this->table, ['soft_delete' => 1]);
     }
-
-    $old_email = $user->email;
-
-    $this->db->where('id', (int)$id);
-    return $this->db->update($this->table, [
-        'soft_delete' => 1,
-        'email' => time() . '_deleted_' . $old_email
-    ]);
-}
 
     //  Email uniqueness check (exclude own row on edit)
     public function email_exists($email, $exclude_id = 0)
